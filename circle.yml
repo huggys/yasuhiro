@@ -1,0 +1,8 @@
+deployment:
+  production:
+    branch: master
+    heroku:
+      appname: yasuhiro
+test:
+  post:
+    - echo hoge
