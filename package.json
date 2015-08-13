@@ -5,6 +5,7 @@
   "author": "uknmr <y.kinmori@gmail.com>",
   "description": "Yasuhiro is a idiot who doesn't know anything",
   "dependencies": {
+    "cron": "^1.0.9",
     "hubot": "^2.13.2",
     "hubot-diagnostics": "0.0.1",
     "hubot-google-images": "^0.1.5",
