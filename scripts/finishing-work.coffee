@@ -4,13 +4,24 @@
 # Notes:
 #   ぴったんこカン・カンならささやかなお祝い
 
-END_HOUR = 17
-END_MINUTES = 45
-END_SECOND = 0
+CronJob = require('cron').CronJob
+config =
+  endHour: 17
+  endMinute: 45
+  endSecond: 0
+  targetChannel: 'ganbalow'
+
 module.exports = (robot) ->
+  job = new CronJob(
+    cronTime: '00 45 16 * * 1-5'
+    onTick: ->
+      robot.send {room: config.targetChannel}, "本当にサイト見てるの？サイトで買い物してるの？\nこんなシステムで恥ずかしくないの？感覚を疑うぞ。\n自分がお客様だったらどう思うか、真剣に他人事ではなく、自分事で考えろ！"
+    start: true
+  )
+
   robot.hear /定時/i, (res) ->
     endDate = new Date()
-    endDate.setHours(END_HOUR, END_MINUTES, END_SECOND)
+    endDate.setHours(config.endHour, config.endMinute, config.endSecond)
 
     remainigTime = new Date(endDate.getTime() - Date.now())
 
