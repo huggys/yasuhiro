@@ -44,7 +44,7 @@ module.exports = (robot) ->
         targets[index]
       )
 
-    url = "/repos/#{owner}/#{repo}/issues/#{number}"
+    url = "/repos/#{owner}/#{repo}/issues/#{pr.number}"
     data = {'assignee': assignee}
     github.patch(url, data, (issue) ->
       robot.send({room: config.targetChannel}, "#{issue.assignee.login} has been assigned for [\##{issue.number} #{issue.title}](#{issue.html_url}) as a reviewer")
