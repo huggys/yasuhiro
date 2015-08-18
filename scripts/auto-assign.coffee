@@ -18,7 +18,10 @@ module.exports = (robot) ->
     body = req.body
 
     if signature != generateSignature(hashAlgorithm, process.env.GITHUB_WEBHOOK_SECRET, body)
+      robot.logger.error("Unauthorized!")
       return res.status(401).send('Unauthorized')
+
+    robot.logger.info("Pass signature!")
 
     # openかreopen以外は無視
     if body.action not in ['opened', 'reopened']
@@ -44,11 +47,15 @@ module.exports = (robot) ->
         targets[index]
       )
 
+    robot.logger.info("assignee: #{assignee}")
+
     url = "/repos/#{owner}/#{repo}/issues/#{pr.number}"
     data = {'assignee': assignee}
     github.patch(url, data, (issue) ->
       robot.send({room: config.targetChannel}, "#{issue.assignee.login} has been assigned for [\##{issue.number} #{issue.title}](#{issue.html_url}) as a reviewer")
     )
+
+    robot.logger.info("Assign complete!")
 
     res.send('OK')
   )
