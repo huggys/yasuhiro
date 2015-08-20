@@ -37,25 +37,25 @@ module.exports = (robot) ->
     repo = repository.name
     owner = repository.owner.login
 
-    gen = github.get("/repos/#{owner}/#{repo}/collaborators", (collaborators) ->
+    github.get("/repos/#{owner}/#{repo}/collaborators", (collaborators) ->
       # プルリクした本人は除外
       targets = collaborators.filter (collaborator) ->
         collaborator.login != pr.user.login
       index = Math.floor(Math.random() * targets.length)
 
-      yield targets[index]
+      assignee = targets[index]
+
+      url = "/repos/#{owner}/#{repo}/issues/#{pr.number}"
+      data = {assignee: assignee.login}
+
+      github.patch(url, data, (issue, error) ->
+        robot.logger.info("issue: #{JSON.stringify(issue)}")
+        robot.send({room: config.targetChannel}, "#{issue.assignee.login} has been assigned for [\##{issue.number} #{issue.title}](#{issue.html_url}) as a reviewer")
+      )
+
+      robot.logger.info("Assign complete!")
+      res.send('OK')
     )
-
-    url = "/repos/#{owner}/#{repo}/issues/#{pr.number}"
-    data = {assignee: gen.next().value.login}
-
-    github.patch(url, data, (issue, error) ->
-      robot.logger.info("issue: #{JSON.stringify(issue)}")
-      robot.send({room: config.targetChannel}, "#{issue.assignee.login} has been assigned for [\##{issue.number} #{issue.title}](#{issue.html_url}) as a reviewer")
-    )
-
-    robot.logger.info("Assign complete!")
-    res.send('OK')
   )
 
 generateSignature = (hashAlgorithm, key, data) ->
