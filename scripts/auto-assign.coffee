@@ -52,7 +52,7 @@ module.exports = (robot) ->
 
       github.patch(url, data, (issue, error) ->
         robot.logger.info("issue: #{JSON.stringify(issue)}")
-        robot.send({room: config.targetChannel}, "#{issue.assignee.login} has been assigned for [\##{issue.number} #{issue.title}](#{issue.html_url}) as a reviewer")
+        robot.send({room: config.targetChannel}, "#{issue.assignee.login} has been assigned for #{issue.html_url} as a reviewer")
 
         robot.logger.info("Assign complete!")
       )
