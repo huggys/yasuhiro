@@ -38,22 +38,35 @@ module.exports = (robot) ->
     owner = repository.owner.login
 
     github.get("/repos/#{owner}/#{repo}/collaborators", (collaborators) ->
-      # プルリクした本人は除外
       targets = collaborators.filter (collaborator) ->
-        collaborator.login != pr.user.login
+        userName = pr.user.login
+        # プルリクした本人とbotは除外
+        collaborator.login != userName && !/bot$/.test(userName)
       index = Math.floor(Math.random() * targets.length)
 
-      assignee = targets[index]
+      assignee = targets[index].login
 
+      # Asigneeを設定
       url = "/repos/#{owner}/#{repo}/issues/#{pr.number}"
-      data = {assignee: assignee.login}
+      data = {assignee: assignee}
 
       github.patch(url, data, (issue, error) ->
         robot.logger.info("issue: #{JSON.stringify(issue)}")
-        robot.send({room: config.targetChannel}, "#{issue.assignee.login} has been assigned for [\##{issue.number} #{issue.title}](#{issue.html_url}) as a reviewer")
+        robot.send({room: config.targetChannel}, "#{issue.assignee.login} has been assigned for #{issue.html_url} as a reviewer")
+
+        robot.logger.info("Assign complete!")
       )
 
-      robot.logger.info("Assign complete!")
+      # GitHubにComment
+      url += "/comments"
+      data = {body: "@#{assignee} please review this."}
+
+      github.post(url, data, (comment, error) ->
+        robot.logger.info("comment: #{JSON.stringify(comment)}")
+
+        robot.logger.info("Comment complete!")
+      )
+
       res.send('OK')
     )
   )
