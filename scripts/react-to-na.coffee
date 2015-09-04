@@ -13,4 +13,7 @@ module.exports = (robot) ->
     replyWord = res.match[1]
     exclamation = res.match[2]
 
-    res.send "#{replyWord}#{exclamation}"
+    setTimeout ->
+      res.send "#{replyWord}#{exclamation}"
+    , 2000 + Math.random() * 3000
+
