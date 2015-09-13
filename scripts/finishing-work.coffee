@@ -12,10 +12,17 @@ config =
   targetChannel: 'ganbalow'
 
 module.exports = (robot) ->
-  job = new CronJob(
-    cronTime: '00 45 16 * * 1-5'
+  new CronJob(
+    cronTime: '00 45 17 * * 1-5'
     onTick: ->
-      robot.send {room: config.targetChannel}, "本当にサイト見てるの？サイトで買い物してるの？\nこんなシステムで恥ずかしくないの？感覚を疑うぞ。\n自分がお客様だったらどう思うか、真剣に他人事ではなく、自分事で考えろ！"
+      sendNonsense(robot)
+    start: true
+  )
+
+  new CronJob(
+    cronTime: '00 00 */2 * * 1-5'
+    onTick: ->
+      sendNonsense(robot)
     start: true
   )
 
@@ -26,6 +33,15 @@ module.exports = (robot) ->
     remainigTime = new Date(endDate.getTime() - Date.now())
 
     res.emote printDate(remainigTime)
+
+sendNonsense = (robot) ->
+  robot.http('http://yasuhiro-api.herokuapp.com/nonsenses')
+    .get() (err, res, body) ->
+      nonsenses = JSON.parse(body).data
+      index = Math.floor(Math.random() * nonsenses.length)
+      nonsense = nonsenses[index]
+
+      robot.send {room: config.targetChannel}, nonsense.body
 
 printDate = (milliSec) ->
   date = new Date(milliSec)
