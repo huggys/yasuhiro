@@ -39,9 +39,8 @@ module.exports = (robot) ->
 
     github.get("/repos/#{owner}/#{repo}/collaborators", (collaborators) ->
       targets = collaborators.filter (collaborator) ->
-        userName = pr.user.login
         # プルリクした本人とbotは除外
-        collaborator.login != userName && !/bot$/.test(userName)
+        collaborator.login != pr.user.login && !/bot$/.test(collaborator.login)
       index = Math.floor(Math.random() * targets.length)
 
       assignee = targets[index].login
