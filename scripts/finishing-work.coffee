@@ -9,7 +9,7 @@ config =
   endHour: 17
   endMinute: 45
   endSecond: 0
-  targetChannel: 'ganbalow'
+  targetChannel: 'general'
 
 module.exports = (robot) ->
   new CronJob(
@@ -20,7 +20,7 @@ module.exports = (robot) ->
   )
 
   new CronJob(
-    cronTime: '00 00 */2 * * 1-5'
+    cronTime: '00 00 9-17/2 * * 1-5'
     onTick: ->
       sendNonsense(robot)
     start: true
@@ -50,4 +50,4 @@ printDate = (milliSec) ->
   second = date.getUTCSeconds()
   isExactly = (hour + minute + second) == 0
 
-  "定時まであと#{if hour then "#{hour}時間" else ""}#{if minute then "#{minute}分" else ""}#{if second then "#{second}秒" else ""}です#{if isExactly then ":tada:" else ""}"
+  "定時まであと#{if hour then "#{hour}時間" else ""}#{if minute then "#{minute}分" else ""}#{if second then "#{second}秒" else ""}です#{if isExactly then ":100:" else ""}"
