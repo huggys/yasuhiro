@@ -9,7 +9,7 @@
 #   none
 
 module.exports = (robot) ->
-  robot.hear /(ね|な)[ぁあ?？]?([!！wｗ]*)\s?(yasu(hiro)?|やす(ひろ)?|康弘)?[!?！？]*$/i, (res) ->
+  robot.hear /(おう|ね|な)[ぁあ?？]?([!！wｗ]*)\s?(yasu(hiro)?|やす(ひろ)?|康弘)?[!?！？]*$/i, (res) ->
     replyWord = res.match[1]
     exclamation = res.match[2]
 
