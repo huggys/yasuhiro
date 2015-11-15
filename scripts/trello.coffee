@@ -42,5 +42,6 @@ showCards = (res) ->
     res.emote '- ' + card.name for card in data
 
 getLists = () ->
-  t.get '/1/boards/' + process.env.HUBOT_TRELLO_BOARD, (err, data) ->
+  t.get '/1/boards/' + process.env.HUBOT_TRELLO_BOARD + '/lists', (err, data) ->
+    robot.logger.info(data)
     return data
