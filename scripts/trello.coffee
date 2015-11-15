@@ -27,21 +27,18 @@ module.exports = (robot) ->
     showCards(res)
 
 createCard = (res, title) ->
-  lists = getLists()
-  firstList = lists[0]
-  t.post '/1/cards', {name: title, idList: firstList.id}, (err, data) ->
-    if err
-      res.emote('追加に失敗したよ')
-      return
+  t.get('/1/boards/' + process.env.HUBOT_TRELLO_BOARD + '/lists', (err, lists) ->
+    firstList = lists[0]
+    t.post('/1/cards', {name: title, idList: firstList.id}, (err, data) ->
+      if err
+        res.emote('追加に失敗したよ')
+        return
 
-    res.emote("[#title] を #firstList.name に追加したよ")
+      res.emote("[#title] を #firstList.name に追加したよ")
+    )
+  )
 
 showCards = (res) ->
   t.get '/1/boards/' + process.env.HUBOT_TRELLO_BOARD + '/cards', {filter: 'open'}, (err, data) ->
     res.emote ':shit:'
     res.emote '- ' + card.name for card in data
-
-getLists = () ->
-  t.get '/1/boards/' + process.env.HUBOT_TRELLO_BOARD + '/lists', (err, data) ->
-    robot.logger.info(data)
-    return data
