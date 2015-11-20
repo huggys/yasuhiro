@@ -3,6 +3,7 @@
 #
 # Commands:
 #   ぬるぽ - You reply with, "ｶﾞｯ" When you post a "ぬるぽ" word.
+#   芝刈り - 草が生えすぎ
 #
 # Notes:
 #   ネタ/ジョーク系のbot全般
@@ -20,3 +21,13 @@ module.exports = (robot) ->
 （＿フ彡             / ←>> @#{msg.message.user.name}
 ```
   """
+
+  robot.hear /(w|ｗ){4,}/i, (msg) ->
+    msg.send """
+```
+　　　∧,,∧
+　 (；`・ω・）　　,
+　 /　ｏ={=}ｏ , ', ´
+､､しー-Ｊミ(.@)ｗｗｗｗｗｗｗｗｗｗｗ
+```
+    """
