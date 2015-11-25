@@ -17,50 +17,124 @@
 #
 # Notes:
 #  None
-Trello = require('node-trello')
-t = new Trello(process.env.HUBOT_TRELLO_KEY, process.env.HUBOT_TRELLO_TOKEN)
+TRELLO_KEY = process.env.HUBOT_TRELLO_KEY
+TRELLO_TOKEN = process.env.HUBOT_TRELLO_TOKEN
+TRELLO_BOARD = process.env.HUBOT_TRELLO_BOARD
+BACKLOG_URL = process.env.HUBOT_BACKLOG_URL
+BACKLOG_KEY = process.env.HUBOT_BACKLOG_KEY
 
 module.exports = (robot) ->
-  robot.hear /todo add (.*)/i, (res) ->
-    title = res.match[1]
-
-    isBacklog = title.match(/OMNI_SYSTEM_UNYOU-\d+/)
+  robot.hear(/todo add (.*)/i, (res) ->
+    taskName = res.match[1]
+    backlog = taskName.match(/OMNI_SYSTEM_(UNYOU-\d+)/)
     # Backlogではない場合
-    if !isBacklog
-      createCard(res, title)
+    if !backlog
+      res.emote("Backlogにないよ")
       return
 
-    title = isBacklog[0]
-    # Backlog課題を取得
-    robot.http("#{process.env.HUBOT_BACKLOG_URL}/api/v2/issues/#{title}?apiKey=#{process.env.HUBOT_BACKLOG_KEY}")
-      .get() (err, res_, body) ->
-        data = JSON.parse(body)
-        desc = {desc: "#{process.env.HUBOT_BACKLOG_URL}/view/#{title}"}
+    title = backlog[0]
+    abbr = backlog[1]
+    summary = ''
 
-        createCard(res, title + '\n' + data.summary, desc)
-
-  robot.hear /todo list/, (res) ->
-    showCards(res)
-
-createCard = (res, title, desc) ->
-  t.get('/1/boards/' + process.env.HUBOT_TRELLO_BOARD + '/lists', (err, lists) ->
-    firstList = lists[0]
-    options = {name: title, idList: firstList.id}
-
-    # descが存在する場合はoptionsにmerge
-    if desc
-      options = Object.assign(options, desc)
-
-    t.post('/1/cards', options, (err, data) ->
-      if err
-        res.emote('追加に失敗したよ')
-        return
-
-      res.emote("[#{title}] を #{firstList.name} に追加したよ")
+    getBacklog(robot, title).then((data) ->
+      summary = data.summary
+      getList()
+    ).then((list) ->
+      createCards(list.id, abbr, summary, "#{BACKLOG_URL}/view/#{title}")
+    ).then((data) ->
+      res.emote("#{abbr}の追加が完了した")
+    ).catch((error) ->
+      robot.logger.info(error)
+      res.emote("ごめん、#{abbr}の追加に失敗した")
     )
   )
 
-showCards = (res) ->
-  t.get '/1/boards/' + process.env.HUBOT_TRELLO_BOARD + '/cards', {filter: 'open'}, (err, data) ->
-    res.emote ':shit:'
-    res.emote '- ' + card.name for card in data
+  robot.hear(/todo list/, (res) ->
+    showCards().then((cards) ->
+      res.emote('残タスクな:shit:')
+      for card in cards
+        res.emote('- ' + card.name)
+    ).catch((error) ->
+      robot.logger.info(error)
+      res.emote('すまん、一覧取得できなかった:pray:')
+    )
+  )
+
+getBacklog = (robot, issueKey) ->
+  new Promise((resolve, reject) ->
+    request = robot.http("#{BACKLOG_URL}/api/v2/issues/#{issueKey}?apiKey=#{BACKLOG_KEY}")
+      .get()
+
+    request((err, res, body) ->
+      if err
+        return reject(new Error(err))
+
+      resolve(JSON.parse(body))
+    )
+  )
+
+getInstance = ->
+  Trello = require('node-trello')
+  new Trello(TRELLO_KEY, TRELLO_TOKEN)
+
+getList = ->
+  new Promise((resolve, reject) ->
+    trello = getInstance()
+    trello.get('/1/boards/' + TRELLO_BOARD + '/lists', (err, lists) ->
+      if err
+        return reject(new Error(err))
+
+      target = lists.filter((list) ->
+        list.name.match(/to do/i)
+      )
+
+      resolve(target[0])
+    )
+  )
+
+createCard = (listId, title, desc) ->
+  new Promise((resolve, reject) ->
+    trello = getInstance()
+    options =
+      name: title
+      desc: desc || ''
+      idList: listId
+
+    trello.post('/1/cards', options, (err, data) ->
+      if err
+        return reject(new Error(err))
+
+      resolve(data)
+    )
+  )
+
+createCards = (listId, abbr, summary, url) ->
+  types = [
+    '仕様調査・作成'
+    '7NM調整・合意'
+    '設計書作成'
+    '実装'
+    '単体テスト項目作成'
+    '単体テスト'
+    'リリース準備'
+    'チーム内試験'
+    'サイト内試験'
+  ]
+  desc = summary.substr(0, 15) + '…'
+
+  promises = for type in types
+    title = "#{abbr}[#{type}]#{desc}"
+    createCard(listId, title, url)
+
+  Promise.all(promises)
+
+showCards = ->
+  new Promise((resolve, reject) ->
+    trello = getInstance()
+    trello.get('/1/boards/' + TRELLO_BOARD + '/cards', {filter: 'open'}, (err, data) ->
+      if err
+        return reject(new Error(err))
+
+      resolve(data)
+    )
+  )
