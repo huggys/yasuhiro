@@ -22,11 +22,11 @@ module.exports = (robot) ->
           robot.send {room: channel}, 'Backlogにはなにも起票されていませんでした'
           return
 
-        robot.send {room: channel}, "*#{issues.length}*件のBacklogがあります。"
+        message = "*#{issues.length}件のBacklogがあります。*"
         for issue in issues
-          robot.send({
-            room: channel
-          }, "#{issue.summary} #{getBacklogURI(issue.issueKey)}")
+          message += "\n#{issue.summary} #{getBacklogURI(issue.issueKey)}"
+
+        robot.messageRoom(channel, message)
       ).catch((error) ->
         robot.logger.info(error)
         robot.send {room: channel}, '謎のエラーが発生した'
