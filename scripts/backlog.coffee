@@ -15,7 +15,7 @@ channel = 'omni-common'
 
 module.exports = (robot) ->
   new CronJob(
-    cronTime: '0,30 * * * * 1-5'
+    cronTime: '0 0 9,11,15 * * 1-5'
     onTick: ->
       getBacklog(robot).then((issues) ->
         if !issues.length
