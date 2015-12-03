@@ -18,13 +18,15 @@ module.exports = (robot) ->
     cronTime: '0,30 * * * * 1-5'
     onTick: ->
       getBacklog(robot).then((issues) ->
-        if !issues
+        if !issues.length
           robot.send {room: channel}, 'Backlogにはなにも起票されていませんでした'
           return
 
-        robot.send {room: channel}, "#{issues.length}件のBacklogがあります。"
+        robot.send {room: channel}, "*#{issues.length}*件のBacklogがあります。"
         for issue in issues
-          robot.send {room: channel}, "#{issues.length}件のBacklogがあります。"
+          robot.send({
+            room: channel
+          }, "#{issue.summary} #{getBacklogURI(issue.issueKey)}")
       ).catch((error) ->
         robot.logger.info(error)
         robot.send {room: channel}, '謎のエラーが発生した'
@@ -44,3 +46,6 @@ getBacklog = (robot) ->
       resolve(JSON.parse(body))
     )
   )
+
+getBacklogURI = (issueKey) ->
+  "#{BACKLOG_URL}/view/#{issueKey}"
