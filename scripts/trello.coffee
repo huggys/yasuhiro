@@ -111,7 +111,6 @@ createCard = (listId, title, desc) ->
 createCards = (listId, abbr, summary, url) ->
   types = [
     '仕様調査・作成'
-    '7NM調整・合意'
     '設計書作成'
     '実装'
     '単体テスト項目作成'
