@@ -7,7 +7,7 @@
 CronJob = require('cron').CronJob
 config =
   endHour: 17
-  endMinute: 45
+  endMinute: 30
   endSecond: 0
   targetChannel: 'general'
 
