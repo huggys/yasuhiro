@@ -4,7 +4,7 @@
 # Commands:
 #   ぬるぽ - You reply with, "ｶﾞｯ" When you post a "ぬるぽ" word.
 #   芝刈り - 草が生えすぎ
-#
+#   お茶   - 疲れたときにお茶を差し出す
 # Notes:
 #   ネタ/ジョーク系のbot全般
 
